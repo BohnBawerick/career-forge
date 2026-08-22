@@ -1,7 +1,7 @@
 # Issue tracker: GitHub
 
-> Not wired up yet: this repo has no git remote. `gh` needs one.
-> Run `git init` and create the GitHub repo before any skill tries to make an issue.
+Repo: [BohnBawerick/career-forge](https://github.com/BohnBawerick/career-forge). The five triage
+labels already exist there.
 
 Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all operations.
 
