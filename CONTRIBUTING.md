@@ -1,9 +1,10 @@
 # Contributing
 
-There is no code yet. The design is being worked out one decision at a time on the
+There is a skeleton and no features. The design is being worked out one decision at a time on the
 [issue tracker](https://github.com/BohnBawerick/career-forge/issues), and the map issue is the
-place to see where it is up to. Opinions on an open ticket are welcome now. Patches will be
-welcome once there is something to patch.
+place to see where it is up to. Opinions on an open ticket are welcome now.
+[Getting started](README.md#getting-started) in the README gets you a running development
+environment.
 
 ## Licence and sign-off
 

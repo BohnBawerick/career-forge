@@ -1,0 +1,7 @@
+# career-forge is one package with no workspace (ADR 0004). This file lists no member packages;
+# it exists because pnpm 11 reads its settings from here rather than from .npmrc.
+#
+# Postinstall scripts do not run unless they are listed here.
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true

@@ -2,10 +2,12 @@
 
 Working name. Rename it when the idea is firm.
 
-Status: no code yet. The design is being worked out one decision at a time on the
-[issue tracker](https://github.com/BohnBawerick/career-forge/issues), and every decision that
-survives is written down in [`docs/adr/`](docs/adr/). The words the project uses are fixed in
-[`CONTEXT.md`](CONTEXT.md).
+Status: a skeleton and nothing else. There is a development environment, an empty app that can
+sign an Account up and log it back in, a queue and a worker, and no feature of any kind. See
+[getting started](#getting-started) to run it. The design is being worked out one decision at a
+time on the [issue tracker](https://github.com/BohnBawerick/career-forge/issues), and every
+decision that survives is written down in [`docs/adr/`](docs/adr/). The words the project uses
+are fixed in [`CONTEXT.md`](CONTEXT.md).
 
 ## The problem
 
@@ -54,6 +56,93 @@ Two rules that will not move:
 - Every generated line about ability traces back to a stored evidence record, checked on the server
   after the model has spoken. An unbacked line is rejected and turned into an interview question.
 - The repo is public and seeded with fabricated data only. No real personal data ever lands here.
+
+## Getting started
+
+You need Docker, Node 22 or later, and pnpm. `corepack enable` gets you the right pnpm.
+
+```
+git clone https://github.com/BohnBawerick/career-forge.git
+cd career-forge
+cp .env.example .env
+```
+
+Open `.env` and replace the three placeholder values: `POSTGRES_PASSWORD`, `GOTRUE_DB_PASSWORD`
+and `GOTRUE_JWT_SECRET`. The JWT secret has to be at least 32 characters, and one secret is
+shared between career-forge and GoTrue, so generate it once:
+
+```
+openssl rand -base64 48
+```
+
+Then start the two containers the development environment is made of, install, and migrate:
+
+```
+docker compose -f docker-compose.dev.yml up -d
+pnpm install
+pnpm db:migrate
+pnpm dev
+```
+
+Open http://localhost:3000. Nobody has claimed the install yet, so the first address and password
+you enter become the Owner, and sign-up then closes. The address is a login name: nothing is ever
+sent to it. `pnpm seed` does the same thing from the command line with a fabricated Account.
+
+The queue consumer is its own command. In one shell:
+
+```
+pnpm worker
+```
+
+and in another:
+
+```
+pnpm queue:ping "anything you like"
+```
+
+If port 5432 or 3000 is already taken on your machine, set `POSTGRES_PORT` in `.env` and pass
+`--port` to `pnpm dev`.
+
+Your data lives in two places: the Postgres volume and the storage folder named by
+`STORAGE_FILESYSTEM_ROOT`. A backup is a database dump and a copy of that folder.
+
+### The commands
+
+| Command | What it does |
+| --- | --- |
+| `pnpm dev` | The app, on port 3000 |
+| `pnpm worker` | The pg-boss consumer |
+| `pnpm queue:ping` | Puts one test job on the queue |
+| `pnpm db:generate` | Writes a migration from the schema |
+| `pnpm db:migrate` | Applies migrations |
+| `pnpm db:check-auth` | Proves career-forge can read the schema GoTrue owns |
+| `pnpm seed` | Creates a fabricated Owner |
+| `pnpm lint` | ESLint, including the rule below |
+| `pnpm typecheck` | vue-tsc over every directory |
+| `pnpm test` | Vitest |
+| `pnpm test:e2e` | Playwright, starting its own dev server |
+| `pnpm build` | A production build |
+
+### Where the code goes
+
+One package, no workspace. These directories are the seams; if one of them ever has to become a
+package, it becomes one without moving ([ADR 0004](docs/adr/0004-typescript-end-to-end-in-one-nuxt-app.md)).
+
+| Directory | Holds |
+| --- | --- |
+| `app/` | The Vue side of the Nuxt app |
+| `server/` | Nitro server routes, which are the HTTP API |
+| `core/` | The domain rules |
+| `db/` | Drizzle schema, migrations, and GoTrue's `auth` schema declared read-only |
+| `queue/` | The only module that talks to pg-boss |
+| `worker/` | The pg-boss consumer |
+| `storage/` | Sources and Documents on disk, behind a switch for S3 |
+| `seed/` | Fabricated data |
+| `tests/` | Vitest |
+| `e2e/` | Playwright |
+
+`server/` and `worker/` both import `core/`. `core/` imports neither, and `pnpm lint` fails if it
+ever does.
 
 ## Licence
 

@@ -24,3 +24,16 @@ venv/
 # OS
 .DS_Store
 Thumbs.db
+
+# Nuxt
+.nuxt/
+.output/
+.nitro/
+.data/
+
+# TypeScript incremental build state
+*.tsbuildinfo
+
+# Test output
+playwright-report/
+test-results/
