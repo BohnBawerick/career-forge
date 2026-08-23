@@ -1,6 +1,9 @@
 # Agent scratch space
 .scratch/
 
+# Pointers to private repos and paths. Never published.
+LOCAL.md
+
 # Env and secrets
 .env
 .env.*

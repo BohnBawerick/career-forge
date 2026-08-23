@@ -1,8 +1,9 @@
 # TypeScript end to end, in one Nuxt app
 
-The sister project `mrb-platform` is a .NET 10 API behind a Nuxt 4 frontend. career-forge could have
-copied that and been productive on day one. It does not. The whole stack is TypeScript, and the
-frontend and the HTTP API are the same Nuxt 4 application, served by its built-in Nitro server.
+The author already runs a deployed app built as a .NET 10 API behind a Nuxt 4 frontend, so
+career-forge could have copied that shape and been productive on day one. It does not. The whole
+stack is TypeScript, and the frontend and the HTTP API are the same Nuxt 4 application, served by
+its built-in Nitro server.
 
 Three reasons, in order of weight.
 
@@ -22,7 +23,7 @@ Nitro server routes already are an HTTP API, so that would have been a second se
 a client the map puts out of scope.
 
 The honest cost: the first few weeks are slower than they would have been in C#. The Vue and Nuxt
-half of what `mrb-platform` taught carries over. The C# half does not.
+half of that earlier experience carries over. The C# half does not.
 
 ## Consequences
 

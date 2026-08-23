@@ -2,23 +2,23 @@
 
 ## What this is
 
-Idea sketch for an open-source job application platform. Read `README.md` first, then
-`docs/OPEN_QUESTIONS.md`.
+An open-source job application platform, being designed before it is built. Read `README.md`
+first, then `CONTEXT.md` for the vocabulary and `docs/adr/` for what is already settled.
+`docs/OPEN_QUESTIONS.md` is the original list and is now mostly answered by the ADRs.
 
-Nothing is built. Nothing is decided. Do not start writing code until the open questions have
-answers and a spec exists.
-
-## Source material
-
-| Where | What to take from it |
-|---|---|
-| `../Get_a_real_job/` | The working private prototype. Skills inventory, portfolio format, job intake pipeline, application SOP, tracker. Read its `CLAUDE.md`. |
-| `github.com/BohnBawerick/mrb-platform` | How to build and ship it. Stack, docker packaging, public demo, seeded fake data, README that explains the problem first. |
+No code exists yet. Work happens one decision at a time through the map issue on the tracker. Do
+not start building outside a ticket that says to.
 
 ## Hard rules for this project
 
-- Never copy real personal data from `../Get_a_real_job/` into this repo. Seed with fabricated data.
-- Every generated resume line must trace back to a stored evidence record. No invented skills.
+- This repo is public. Never write anything into it that points at private repos, private paths on
+  the author's machine, or real personal data. Seed with fabricated data only.
+- Every generated resume line must trace back to a stored Evidence record. No invented skills.
+
+## Local notes
+
+If `LOCAL.md` exists at the repo root, read it. It is gitignored and holds pointers that must not
+be published.
 
 ## Agent skills
 

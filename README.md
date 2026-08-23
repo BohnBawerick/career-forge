@@ -2,79 +2,55 @@
 
 Working name. Rename it when the idea is firm.
 
-Status: idea sketch only. No code, no decisions locked. This file exists so the idea stops living
-in my head.
+Status: no code yet. The design is being worked out one decision at a time on the
+[issue tracker](https://github.com/BohnBawerick/career-forge/issues), and every decision that
+survives is written down in [`docs/adr/`](docs/adr/). The words the project uses are fixed in
+[`CONTEXT.md`](CONTEXT.md).
 
-## The one-line version
+## The problem
 
-Take the private job-hunting system in `PROJECTS/Get_a_real_job/` and turn it into an open-source
-app that anyone can run, with their own AI key, to build a portfolio, keep a skills inventory, and
-generate a resume and cover letter tailored to each job they apply for.
+Every resume tool on the market is a template and a paywall. Point one at a job ad and it will
+happily write that you led a team of twelve, because nothing in it knows whether you did. Lying is
+the default failure mode.
 
-## Where it comes from
+The fix is boring and it is the whole product: keep an evidence base, and refuse to write a line
+that does not come out of it.
 
-Two existing projects feed this.
+## What it does
 
-**`PROJECTS/Get_a_real_job/`** is the working prototype. It already does, by hand and by Claude
-Code skill:
+A person feeds the app old resumes, portfolio exports and past applications. Nothing happens. The
+app sits on them.
 
-- a master skills inventory (`SKILLS_INVENTORY.md`) that everything else is matched against
-- 14 portfolio write-ups, one file per project, written for interview prep and cover letter reuse
-- a job intake pipeline: `inbox/` raw ads to `pending/` clean files with frontmatter to `archive/`
-- a scraper for job boards
-- a documented SOP that turns a job ad into a skills-match analysis, a tailored resume and a cover
-  letter
-- an application tracker and a follow-up status flow
-- a portfolio website folder
+Naming a job starts the work. A cheap first pass warns the person if the job is a long stretch,
+then lets them decide. If they carry on, the app interviews them, digging into the projects it
+already knows about to find evidence that answers what the job actually asked for. Their answers
+are kept in their own words and never overwritten.
 
-The insight worth keeping: **the skills inventory is the single source of truth.** Resume, cover
-letter and match score are all derived from it, never invented. That is the part most resume tools
-get wrong.
+Out come a tailored resume and a cover letter, where every line about ability cites a stored
+evidence record. Gaps are named honestly rather than papered over, because the alternative is
+getting caught in the interview. The application is frozen and kept, so months later the person can
+read back exactly what they sent. If they get called in, a third document is generated on demand.
 
-**`github.com/BohnBawerick/mrb-platform`** is the reference for how to build and ship it. It is a
-real deployed app (.NET 10, Nuxt 4, self-hosted Supabase, Docker, CI, live demo, seeded fake data).
-What to borrow from it:
+## How it is meant to run
 
-- the shape: worker pipeline for document generation, database with an audit trail, one-click
-  compile of a final document
-- the packaging: docker compose, run-it-locally instructions, a read-only public demo
-- the discipline: the README explains the problem before the features
+One command. `docker compose up`, on a laptop or a small server, no account with anybody.
 
-## What the app does
+Bring your own AI key: Anthropic, OpenAI or Google Gemini, with Ollama supported as best effort.
+Roughly two cents to thirty-four cents per application, paid to the model provider, not to me.
 
-Rough golden path:
+Accounts exist from day one. The same code runs one person on a laptop and a family on a server,
+and each Account's data is walled off from every other by the database itself.
 
-1. **Sign up and import yourself.** Upload an existing resume or LinkedIn export. The app parses it
-   into a structured profile.
-2. **Build the skills inventory.** Structured records: skill, level, evidence, where it was used,
-   certifications, standards. Editable by hand, extendable by AI suggestion.
-3. **Build the portfolio.** One entry per project or job achievement, with a guided interview that
-   pulls the detail out of the user instead of asking them to write from a blank page.
-4. **Add a job.** Paste a URL or the ad text. The app extracts requirements.
-5. **Match.** Score the job against the inventory. Show real gaps honestly. No invented skills.
-6. **Generate.** Tailored resume and cover letter for that specific job, built only from documented
-   evidence, in the user's own template.
-7. **Track.** Status flow, follow-up dates, notes, outcomes.
-8. **Publish.** Optional public portfolio site generated from the same data.
+The code is free and open. If a hosted version ever exists, that is what gets paid for.
 
-## The bring-your-own-AI idea
+## Where the design is up to
 
-Users plug in their own model key (Anthropic, OpenAI, local Ollama, whatever) and let it run. That
-keeps hosting cost near zero and keeps user data on their side. Needs a provider abstraction layer
-from day one rather than bolted on later.
+The stack, the domain model, the AI provider layer, job ad intake and the account lifecycle are all
+settled and written up as ADRs. Everything still open is a ticket on the tracker, hanging off the
+map issue.
 
-## Why it might be worth doing
+Two rules that will not move:
 
-- Existing resume builders are templates plus a paywall. None of them hold a real evidence base.
-- The honest-gap-reporting angle is a genuine difference. Lying on a resume is the default failure
-  mode of AI resume tools.
-- It doubles as a portfolio piece in its own right, same as mrb-platform.
-
-## What is deliberately not decided yet
-
-See `docs/OPEN_QUESTIONS.md`. Do not start building until those are answered.
-
-## Next session
-
-Open this folder in Claude Code and work through `docs/OPEN_QUESTIONS.md` first, then write a real
-spec. Consider a brainstorming pass before the spec.
+- Every generated line about ability traces back to a stored evidence record, checked on the server
+  after the model has spoken. An unbacked line is rejected and turned into an interview question.
+- The repo is public and seeded with fabricated data only. No real personal data ever lands here.

@@ -37,8 +37,8 @@ Answer these before writing a spec. Each one changes the build.
 
 ## Job intake
 
-16. Scraping job boards is against most terms of service. `Get_a_real_job` dodges this by keeping
-    submission manual. What is the public app's answer? Paste-only is the safe default.
+16. Scraping job boards is against most terms of service. What is the app's answer? Paste-only is
+    the safe default.
 17. Auto-apply: tempting, and probably a legal and ethical trap. Decide early and write it down.
 
 ## Open source and licensing
@@ -49,7 +49,6 @@ Answer these before writing a spec. Each one changes the build.
 
 ## Migration
 
-21. Does `Get_a_real_job` become a user of this app, or stay separate? If it becomes a user, my own
-    data is the first real test case.
-22. My private data must not leak into the public repo. Seed with fabricated data, same as
-    mrb-platform does.
+21. Does the author's existing hand-run job-hunting setup become a user of this app, or stay
+    separate? If it becomes a user, real data is the first honest test case.
+22. No real personal data may reach this repo. Seed with fabricated data only.
