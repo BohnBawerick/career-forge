@@ -11,9 +11,27 @@ Every line of every generated **Document** cites Evidence, or it does not get wr
 ## The person and their material
 
 **Account**:
-One person's space, owning everything else here. One install may hold a single Account on a laptop
-or many on a server.
+One person's space, owning everything else here. Always exactly one person, never shared: a Bank is
+somebody's own working life and there is nothing in it to split. One install may hold a single
+Account on a laptop or many on a server.
 _Avoid_: user, profile, tenant
+
+**Owner**:
+The Account that claimed the install by being the first to sign up. Invites people, removes people,
+and holds no power to read what they hold. A laptop install is one where the Owner never invited
+anyone.
+_Avoid_: admin, root, superuser
+
+**Member**:
+Any Account on an install other than the Owner. Holds exactly the same power over its own Bank as
+the Owner holds over theirs.
+_Avoid_: guest, sub-account, invitee
+
+**Invite**:
+A one-time link that creates one Account. Made by the Owner and carried to the person by hand,
+because no install sends email. The same link is what an Owner sends to a Member who forgot their
+password.
+_Avoid_: signup code, token, referral
 
 **Source**:
 A file the person handed the app, stored unchanged and kept forever. Old resumes, portfolio
