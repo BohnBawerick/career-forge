@@ -20,7 +20,8 @@ let starting: Promise<PgBoss> | undefined
 /**
  * Starts pg-boss on first use, creating its schema and its queues if they are not there yet.
  *
- * A failed start is not memoised, so a caller that survives it can try again.
+ * A failed start is not memoised and takes its connection pool down with it, so a caller that
+ * survives one can try again without leaking a pool per attempt.
  */
 export function queue(): Promise<PgBoss> {
   if (!starting) {
@@ -30,8 +31,14 @@ export function queue(): Promise<PgBoss> {
         schema: config().QUEUE_SCHEMA,
       })
       boss.on('error', (error: Error) => console.error('pg-boss:', error))
-      await boss.start()
-      for (const name of Object.values(QUEUES)) await boss.createQueue(name)
+      try {
+        await boss.start()
+        for (const name of Object.values(QUEUES)) await boss.createQueue(name)
+      }
+      catch (error) {
+        await boss.stop({ graceful: false }).catch(() => {})
+        throw error
+      }
       return boss
     })()
     attempt.catch(() => {

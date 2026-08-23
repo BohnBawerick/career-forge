@@ -1,7 +1,7 @@
 # The whole development environment: Postgres and GoTrue, and nothing else (ADR 0005).
 # Nuxt and the worker run on your own machine with `pnpm dev` and `pnpm worker`.
 #
-#   cp .env.example .env    # then fill in the two secrets
+#   cp .env.example .env    # then replace the placeholders it lists at the top
 #   docker compose -f docker-compose.dev.yml up
 
 name: career-forge-dev

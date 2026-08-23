@@ -1,6 +1,24 @@
+import type { Stats } from 'node:fs'
 import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { assertValidKey, type StorageDriver } from './types'
+
+/**
+ * The stats of a stored object, or undefined when nothing is stored under the key.
+ *
+ * Keys name objects, not folders. `put('sources/one.txt', ...)` leaves a `sources` directory
+ * behind, but nobody stored anything at the key `sources`, and S3 would answer that key with
+ * nothing, so neither does this driver.
+ */
+async function statObject(path: string): Promise<Stats | undefined> {
+  try {
+    const stats = await stat(path)
+    return stats.isFile() ? stats : undefined
+  }
+  catch {
+    return undefined
+  }
+}
 
 /**
  * The default driver. One volume on disk, which makes a backup two things: a database dump and
@@ -28,17 +46,12 @@ export function filesystemDriver(root: string): StorageDriver {
     },
 
     async exists(key) {
-      try {
-        await stat(pathFor(key))
-        return true
-      }
-      catch {
-        return false
-      }
+      return (await statObject(pathFor(key))) !== undefined
     },
 
     async delete(key) {
-      await rm(pathFor(key), { force: true })
+      const path = pathFor(key)
+      if (await statObject(path)) await rm(path, { force: true })
     },
   }
 }

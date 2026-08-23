@@ -35,6 +35,17 @@ describe('the filesystem driver', () => {
     await expect(driver.delete('nothing/here')).resolves.toBeUndefined()
   })
 
+  it('does not report the directory a key sits in as a stored object', async () => {
+    const driver = filesystemDriver(root)
+
+    await driver.put('sources/2026/one.txt', new TextEncoder().encode('a fabricated Source'))
+
+    expect(await driver.exists('sources')).toBe(false)
+    expect(await driver.exists('sources/2026')).toBe(false)
+    await expect(driver.delete('sources')).resolves.toBeUndefined()
+    expect(await driver.exists('sources/2026/one.txt')).toBe(true)
+  })
+
   it('refuses a key that would climb out of the root', async () => {
     const driver = filesystemDriver(root)
 

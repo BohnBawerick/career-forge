@@ -67,9 +67,11 @@ cd career-forge
 cp .env.example .env
 ```
 
-Open `.env` and replace the three placeholder values: `POSTGRES_PASSWORD`, `GOTRUE_DB_PASSWORD`
-and `GOTRUE_JWT_SECRET`. The JWT secret has to be at least 32 characters, and one secret is
-shared between career-forge and GoTrue, so generate it once:
+Open `.env` and replace the four placeholder values: `POSTGRES_PASSWORD`, `GOTRUE_DB_PASSWORD`,
+`GOTRUE_JWT_SECRET` and `DATABASE_URL`. `DATABASE_URL` writes the Postgres password out a second
+time, so put the same password in both or the migrations cannot connect. The JWT secret has to be
+at least 32 characters, and one secret is shared between career-forge and GoTrue, so generate it
+once:
 
 ```
 openssl rand -base64 48
@@ -101,7 +103,7 @@ pnpm queue:ping "anything you like"
 ```
 
 If port 5432 or 3000 is already taken on your machine, set `POSTGRES_PORT` in `.env` and pass
-`--port` to `pnpm dev`.
+`--port` to `pnpm dev`. `DATABASE_URL` carries the Postgres port too, so change it there as well.
 
 Your data lives in two places: the Postgres volume and the storage folder named by
 `STORAGE_FILESYSTEM_ROOT`. A backup is a database dump and a copy of that folder.
