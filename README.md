@@ -54,3 +54,13 @@ Two rules that will not move:
 - Every generated line about ability traces back to a stored evidence record, checked on the server
   after the model has spoken. An unbacked line is rejected and turned into an interview question.
 - The repo is public and seeded with fabricated data only. No real personal data ever lands here.
+
+## Licence
+
+AGPL-3.0-or-later. Copyright (C) 2026 BohnBawerick.
+
+Run it, fork it, change it, all free. If you run a **modified** copy as a service for other people,
+publish your changes. Running it for yourself or your household triggers nothing.
+[Why AGPL and not MIT](docs/adr/0008-agpl-3-0-because-the-money-is-in-hosting.md).
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md).
