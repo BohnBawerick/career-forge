@@ -49,9 +49,11 @@ async function submit(path: '/api/auth/signup' | '/api/auth/login') {
   }
   catch (error) {
     // The message the server sent is in the parsed body. `statusMessage` on the error itself is
-    // the HTTP/1.1 reason phrase, which is empty over HTTP/2 and so cannot be relied on.
+    // the HTTP/1.1 reason phrase, which is empty over HTTP/2 and so cannot be relied on. Each
+    // step falls through on an empty string as well as on a missing one, so an error body that
+    // carries the field but leaves it blank still leaves the person with something to read.
     const body = (error as { data?: { statusMessage?: string, message?: string } }).data
-    message.value = body?.statusMessage ?? body?.message ?? 'That did not work.'
+    message.value = body?.statusMessage || body?.message || 'That did not work.'
   }
   finally {
     busy.value = false
