@@ -46,6 +46,15 @@ describe('the filesystem driver', () => {
     expect(await driver.exists('sources/2026/one.txt')).toBe(true)
   })
 
+  it('reports a failure that is not a missing key rather than answering false', async () => {
+    const driver = filesystemDriver(root)
+
+    await driver.put('sources/one.txt', new TextEncoder().encode('a fabricated Source'))
+
+    await expect(driver.exists('sources/one.txt/child')).rejects.toThrow(/ENOTDIR/)
+    await expect(driver.delete('sources/one.txt/child')).rejects.toThrow(/ENOTDIR/)
+  })
+
   it('refuses a key that would climb out of the root', async () => {
     const driver = filesystemDriver(root)
 

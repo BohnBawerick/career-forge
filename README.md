@@ -69,9 +69,18 @@ cp .env.example .env
 
 Open `.env` and replace the four placeholder values: `POSTGRES_PASSWORD`, `GOTRUE_DB_PASSWORD`,
 `GOTRUE_JWT_SECRET` and `DATABASE_URL`. `DATABASE_URL` writes the Postgres password out a second
-time, so put the same password in both or the migrations cannot connect. The JWT secret has to be
-at least 32 characters, and one secret is shared between career-forge and GoTrue, so generate it
-once:
+time, so put the same password in both or the migrations cannot connect.
+
+Both passwords end up inside a connection URL, so keep them to letters, digits, `-` and `_`, or
+percent-encode them. A character such as `@`, `/`, `#` or `?` splits the URL somewhere else and
+GoTrue or the migrations then fail without naming the password. Generate each one with:
+
+```
+openssl rand -hex 24
+```
+
+The JWT secret does not go into a URL. It has to be at least 32 characters, and one secret is
+shared between career-forge and GoTrue, so generate it once:
 
 ```
 openssl rand -base64 48

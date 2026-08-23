@@ -15,7 +15,8 @@ async function statObject(path: string): Promise<Stats | undefined> {
     const stats = await stat(path)
     return stats.isFile() ? stats : undefined
   }
-  catch {
+  catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
     return undefined
   }
 }
