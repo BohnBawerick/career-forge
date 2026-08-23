@@ -48,7 +48,10 @@ async function submit(path: '/api/auth/signup' | '/api/auth/login') {
     await refresh()
   }
   catch (error) {
-    message.value = (error as { statusMessage?: string }).statusMessage ?? 'That did not work.'
+    // The message the server sent is in the parsed body. `statusMessage` on the error itself is
+    // the HTTP/1.1 reason phrase, which is empty over HTTP/2 and so cannot be relied on.
+    const body = (error as { data?: { statusMessage?: string, message?: string } }).data
+    message.value = body?.statusMessage ?? body?.message ?? 'That did not work.'
   }
   finally {
     busy.value = false

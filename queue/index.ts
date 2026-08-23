@@ -17,10 +17,14 @@ export type QueueName = (typeof QUEUES)[keyof typeof QUEUES]
 
 let starting: Promise<PgBoss> | undefined
 
-/** Starts pg-boss on first use, creating its schema and its queues if they are not there yet. */
+/**
+ * Starts pg-boss on first use, creating its schema and its queues if they are not there yet.
+ *
+ * A failed start is not memoised, so a caller that survives it can try again.
+ */
 export function queue(): Promise<PgBoss> {
   if (!starting) {
-    starting = (async () => {
+    const attempt = (async () => {
       const boss = new PgBoss({
         connectionString: config().DATABASE_URL,
         schema: config().QUEUE_SCHEMA,
@@ -30,14 +34,33 @@ export function queue(): Promise<PgBoss> {
       for (const name of Object.values(QUEUES)) await boss.createQueue(name)
       return boss
     })()
+    attempt.catch(() => {
+      if (starting === attempt) starting = undefined
+    })
+    starting = attempt
   }
   return starting
 }
 
+/**
+ * Shuts pg-boss down. Never rejects: every caller is a shutdown path (a `finally`, a signal
+ * handler) where a rejection has nowhere left to go and would take the process down instead of
+ * the error that caused the shutdown.
+ */
 export async function stopQueue(): Promise<void> {
   const pending = starting
   starting = undefined
-  if (pending) await (await pending).stop({ graceful: true })
+  if (!pending) return
+
+  const boss = await pending.catch(() => undefined)
+  if (!boss) return
+
+  try {
+    await boss.stop({ graceful: true })
+  }
+  catch (error) {
+    console.error('pg-boss: stop failed:', error)
+  }
 }
 
 export async function sendTestJob(payload: TestJobPayload): Promise<string> {

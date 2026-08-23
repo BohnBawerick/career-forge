@@ -1,4 +1,4 @@
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, rm, stat, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import { assertValidKey, type StorageDriver } from './types'
 
@@ -29,7 +29,7 @@ export function filesystemDriver(root: string): StorageDriver {
 
     async exists(key) {
       try {
-        await readFile(pathFor(key))
+        await stat(pathFor(key))
         return true
       }
       catch {
