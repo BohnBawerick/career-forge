@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
 
+# Checking out and running the checks is all this needs. Set here rather than per job, so a job
+# added later starts read-only too.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
