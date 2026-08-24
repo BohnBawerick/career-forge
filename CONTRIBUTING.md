@@ -28,6 +28,8 @@ Your name and email go into the public git history. Use whatever name you are ha
 
 ## Before you open a pull request
 
+- Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`. CI runs those four and
+  `pnpm test:e2e` on every pull request, so anything that fails there fails here first.
 - Read [`CONTEXT.md`](CONTEXT.md) and use the words it defines. The vocabulary is settled and
   drifting off it costs a review round.
 - Read [`docs/adr/`](docs/adr/). If your change contradicts one, say so in the pull request and
