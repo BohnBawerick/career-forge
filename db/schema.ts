@@ -1,4 +1,5 @@
-import { boolean, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
+import { boolean, pgTable, text, timestamp, uniqueIndex, uuid } from 'drizzle-orm/pg-core'
 
 /**
  * The tables career-forge owns. GoTrue's `auth` schema is declared separately in `db/auth.ts`
@@ -18,7 +19,14 @@ export const account = pgTable('account', {
   /** The first Account to sign up claims the install and becomes the Owner (ADR 0007). */
   isOwner: boolean('is_owner').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
-})
+}, table => [
+  /**
+   * One Owner per install. `installIsUnclaimed()` reads before the insert writes, so two
+   * concurrent sign-ups can both pass that check; this index is what stops the second one
+   * landing (ADR 0007).
+   */
+  uniqueIndex('account_one_owner').on(table.isOwner).where(sql`${table.isOwner}`),
+])
 
 export type Account = typeof account.$inferSelect
 export type NewAccount = typeof account.$inferInsert

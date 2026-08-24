@@ -7,3 +7,5 @@ CREATE TABLE "account" (
 	CONSTRAINT "account_auth_user_id_unique" UNIQUE("auth_user_id"),
 	CONSTRAINT "account_email_unique" UNIQUE("email")
 );
+--> statement-breakpoint
+CREATE UNIQUE INDEX "account_one_owner" ON "account" USING btree ("is_owner") WHERE "account"."is_owner";

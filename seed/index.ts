@@ -1,5 +1,5 @@
 import 'dotenv/config'
-import { createAccount, findAccountByEmail, normaliseLoginEmail } from '../core/account'
+import { createAccount, findAccountByEmail, installIsUnclaimed, normaliseLoginEmail } from '../core/account'
 import { createGoTrueUser, GoTrueError } from '../core/gotrue'
 import { closeDb } from '../db/client'
 
@@ -22,6 +22,12 @@ async function main(): Promise<void> {
   if (await findAccountByEmail(email)) {
     console.log(`Account ${email} is already seeded. Nothing to do.`)
     return
+  }
+
+  // The same gate the sign-up route enforces: the first Account claims the install and sign-up
+  // closes behind it (ADR 0007). Seeding past that would leave two Owners.
+  if (!(await installIsUnclaimed())) {
+    throw new Error('This install has an Owner already, so there is nothing to seed. Drop the volume and start again to seed a fresh one.')
   }
 
   const user = await createGoTrueUser(email, SEED_OWNER.password).catch((error: unknown) => {

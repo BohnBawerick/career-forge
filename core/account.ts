@@ -33,6 +33,16 @@ export async function installIsUnclaimed(): Promise<boolean> {
   return rows.length === 0
 }
 
+/** True once some Account holds the Owner flag (ADR 0007). */
+export async function installHasOwner(): Promise<boolean> {
+  const rows = await db()
+    .select({ id: account.id })
+    .from(account)
+    .where(eq(account.isOwner, true))
+    .limit(1)
+  return rows.length > 0
+}
+
 export async function createAccount(input: NewAccount): Promise<Account> {
   const rows = await db()
     .insert(account)

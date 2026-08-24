@@ -29,16 +29,20 @@ export default defineEventHandler(async (event) => {
   const email = normaliseLoginEmail(input.data.email)
   const user = await createGoTrueUser(email, input.data.password)
 
-  // The write to GoTrue and the write to our tables cannot be one transaction (ADR 0007). If the
-  // second fails the first is undone here; if that undo also fails, the next login repairs the
+  // The write to GoTrue and the write to our tables cannot be one transaction (ADR 0007). Only a
+  // failed account write undoes the login; if that undo also fails, the next login repairs the
   // half state by creating the missing account row.
+  let account
   try {
-    const account = await createAccount({ authUserId: user.id, email, isOwner: true })
-    setSessionCookie(event, await signInWithPassword(email, input.data.password))
-    return { account: { id: account.id, email: account.email, isOwner: account.isOwner } }
+    account = await createAccount({ authUserId: user.id, email, isOwner: true })
   }
   catch (error) {
     await deleteGoTrueUser(user.id).catch(() => {})
     throw error
   }
+
+  // The install is claimed by now, so a failed token grant leaves both the Account and the login
+  // alone. Deleting them here would brick an install nobody can claim a second time.
+  setSessionCookie(event, await signInWithPassword(email, input.data.password))
+  return { account: { id: account.id, email: account.email, isOwner: account.isOwner } }
 })

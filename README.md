@@ -97,7 +97,8 @@ pnpm dev
 
 Open http://localhost:3000. Nobody has claimed the install yet, so the first address and password
 you enter become the Owner, and sign-up then closes. The address is a login name: nothing is ever
-sent to it. `pnpm seed` does the same thing from the command line with a fabricated Account.
+sent to it. `pnpm seed` claims an unclaimed install from the command line instead, with a
+fabricated Account, and refuses once someone has claimed it.
 
 The queue consumer is its own command. In one shell:
 
