@@ -1,9 +1,10 @@
 # Contributing
 
-There is no code yet. The design is being worked out one decision at a time on the
+There is a skeleton and no features. The design is being worked out one decision at a time on the
 [issue tracker](https://github.com/BohnBawerick/career-forge/issues), and the map issue is the
-place to see where it is up to. Opinions on an open ticket are welcome now. Patches will be
-welcome once there is something to patch.
+place to see where it is up to. Opinions on an open ticket are welcome now.
+[Getting started](README.md#getting-started) in the README gets you a running development
+environment.
 
 ## Licence and sign-off
 
@@ -27,6 +28,8 @@ Your name and email go into the public git history. Use whatever name you are ha
 
 ## Before you open a pull request
 
+- Run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm build`. CI runs those four and
+  `pnpm test:e2e` on every pull request, so anything that fails there fails here first.
 - Read [`CONTEXT.md`](CONTEXT.md) and use the words it defines. The vocabulary is settled and
   drifting off it costs a review round.
 - Read [`docs/adr/`](docs/adr/). If your change contradicts one, say so in the pull request and

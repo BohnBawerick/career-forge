@@ -1,0 +1,121 @@
+# The whole application, for running it rather than developing it.
+#
+# This file does not work yet, on purpose. Build order is build, then package, then publish:
+# `Dockerfile` (packaging) and `docker/caddy/Caddyfile` (publishing) belong to later tickets and
+# are not in the repository. Until they are, use docker-compose.dev.yml.
+#
+# `DATABASE_URL` and `GOTRUE_URL` are built from parts here rather than taken from .env, because
+# the values in .env point at published ports on your own machine and these services talk to each
+# other across the compose network.
+
+name: career-forge
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      GOTRUE_DB_USER: ${GOTRUE_DB_USER}
+      GOTRUE_DB_PASSWORD: ${GOTRUE_DB_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  gotrue:
+    image: supabase/gotrue:v2.186.0
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # No `ports`. GoTrue is reachable only from this network (ADR 0007).
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      PORT: 9999
+      API_EXTERNAL_URL: ${GOTRUE_EXTERNAL_URL}
+
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://${GOTRUE_DB_USER}:${GOTRUE_DB_PASSWORD}@postgres:5432/${POSTGRES_DB}?search_path=auth&sslmode=disable
+
+      GOTRUE_SITE_URL: ${APP_URL}
+      GOTRUE_URI_ALLOW_LIST: ${APP_URL}
+      GOTRUE_DISABLE_SIGNUP: "true"
+
+      GOTRUE_JWT_SECRET: ${GOTRUE_JWT_SECRET}
+      GOTRUE_JWT_EXP: ${GOTRUE_JWT_EXP:-3600}
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+
+      GOTRUE_MAILER_AUTOCONFIRM: "true"
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: "true"
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+
+      GOTRUE_LOG_LEVEL: ${GOTRUE_LOG_LEVEL:-info}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      gotrue:
+        condition: service_healthy
+    environment: &app-environment
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      GOTRUE_URL: http://gotrue:9999
+      GOTRUE_JWT_SECRET: ${GOTRUE_JWT_SECRET}
+      QUEUE_SCHEMA: ${QUEUE_SCHEMA:-pgboss}
+      STORAGE_DRIVER: ${STORAGE_DRIVER:-filesystem}
+      STORAGE_FILESYSTEM_ROOT: /var/lib/career-forge/storage
+      STORAGE_S3_BUCKET: ${STORAGE_S3_BUCKET:-}
+      STORAGE_S3_REGION: ${STORAGE_S3_REGION:-}
+      STORAGE_S3_ENDPOINT: ${STORAGE_S3_ENDPOINT:-}
+      STORAGE_S3_ACCESS_KEY_ID: ${STORAGE_S3_ACCESS_KEY_ID:-}
+      STORAGE_S3_SECRET_ACCESS_KEY: ${STORAGE_S3_SECRET_ACCESS_KEY:-}
+    volumes:
+      - storage-data:/var/lib/career-forge/storage
+
+  # The same image as the web app with a different start command (ADR 0004).
+  worker:
+    build: .
+    restart: unless-stopped
+    command: ["pnpm", "worker"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment: *app-environment
+    volumes:
+      - storage-data:/var/lib/career-forge/storage
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+volumes:
+  postgres-data:
+  storage-data:
+  caddy-data:
+  caddy-config:
