@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createAccount, installIsUnclaimed, normaliseLoginEmail } from '~~/core/account'
+import { createAccount, installIsUnclaimed, isOwnerAlreadyTaken, normaliseLoginEmail } from '~~/core/account'
 import { createGoTrueUser, deleteGoTrueUser, signInWithPassword } from '../../utils/gotrue'
 import { setSessionCookie } from '../../utils/session'
 
@@ -7,15 +7,6 @@ const body = z.object({
   email: z.email(),
   password: z.string().min(8),
 })
-
-/**
- * A sign-up that raced another one loses on the `account_one_owner` unique index rather than on
- * the check above. That is the same refusal, so it gets the same answer.
- */
-function isOwnerAlreadyTaken(error: unknown): boolean {
-  const pg = error as { code?: unknown, constraint?: unknown }
-  return pg?.code === '23505' && pg?.constraint === 'account_one_owner'
-}
 
 /**
  * The first person to sign up claims the install and becomes the Owner. Sign-up then closes and

@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { createAccount, findAccountByEmail, installIsUnclaimed, normaliseLoginEmail } from '../core/account'
-import { createGoTrueUser, GoTrueError } from '../core/gotrue'
+import { createGoTrueUser, deleteGoTrueUser, GoTrueError } from '../core/gotrue'
 import { closeDb } from '../db/client'
 
 /**
@@ -32,12 +32,21 @@ async function main(): Promise<void> {
 
   const user = await createGoTrueUser(email, SEED_OWNER.password).catch((error: unknown) => {
     if (error instanceof GoTrueError && error.status === 422) {
-      throw new Error(`GoTrue already holds a login for ${email}, but no Account points at it. Drop the volume and start again.`)
+      throw new Error(`GoTrue already holds a login for ${email}, but no Account points at it. Log in as ${email} and the login path creates the missing Account.`)
     }
     throw error
   })
 
-  const account = await createAccount({ authUserId: user.id, email, isOwner: true })
+  // The same split write the sign-up route has: GoTrue and our tables cannot share one
+  // transaction (ADR 0007), so a failed account write undoes the login it just made.
+  let account
+  try {
+    account = await createAccount({ authUserId: user.id, email, isOwner: true })
+  }
+  catch (error) {
+    await deleteGoTrueUser(user.id).catch(() => {})
+    throw error
+  }
 
   console.log(`Seeded Owner ${account.email} (${account.id}).`)
   console.log(`Password: ${SEED_OWNER.password}`)

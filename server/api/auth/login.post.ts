@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { createAccount, findAccountByAuthUserId, installHasOwner, normaliseLoginEmail } from '~~/core/account'
+import { findOrCreateAccountForLogin, normaliseLoginEmail } from '~~/core/account'
 import { signInWithPassword } from '../../utils/gotrue'
 import { setSessionCookie } from '../../utils/session'
 
@@ -18,17 +18,8 @@ export default defineEventHandler(async (event) => {
   const session = await signInWithPassword(email, input.data.password)
 
   // A login with no account row means "not set up yet", so the login path creates it. That is
-  // the whole of the cleanup story for a half-finished sign-up (ADR 0007). If that sign-up was
-  // the one meant to claim the install, the repaired Account claims it, so a repair never leaves
-  // the install without an Owner.
-  let account = await findAccountByAuthUserId(session.user.id)
-  if (!account) {
-    account = await createAccount({
-      authUserId: session.user.id,
-      email,
-      isOwner: !(await installHasOwner()),
-    })
-  }
+  // the whole of the cleanup story for a half-finished sign-up (ADR 0007).
+  const account = await findOrCreateAccountForLogin(session.user.id, email)
 
   setSessionCookie(event, session)
   return { account: { id: account.id, email: account.email, isOwner: account.isOwner } }
