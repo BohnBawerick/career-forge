@@ -2,9 +2,9 @@
 
 ## What this is
 
-An open-source job application platform, being designed before it is built. Read `README.md`
-first, then `CONTEXT.md` for the vocabulary and `docs/adr/` for what is already settled.
-`docs/OPEN_QUESTIONS.md` is the original list and is now mostly answered by the ADRs.
+An open-source job application platform. Read `README.md` first, then `CONTEXT.md` for the
+vocabulary and `docs/adr/` for what is already settled. `docs/OPEN_QUESTIONS.md` is the original
+list and is now mostly answered by the ADRs.
 
 The repo holds a skeleton and no features: a development environment, an empty app that can sign
 an Account up, a queue and a worker. `README.md` has the commands. Work happens one decision at a
