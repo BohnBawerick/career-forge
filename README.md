@@ -114,6 +114,8 @@ pnpm queue:ping "anything you like"
 
 If port 5432 or 3000 is already taken on your machine, set `POSTGRES_PORT` in `.env` and pass
 `--port` to `pnpm dev`. `DATABASE_URL` carries the Postgres port too, so change it there as well.
+The same goes for GoTrue: if 9999 is taken, change `GOTRUE_PORT` and change the port in
+`GOTRUE_URL` to match, or every auth call reaches a dead port.
 
 Your data lives in two places: the Postgres volume and the storage folder named by
 `STORAGE_FILESYSTEM_ROOT`. A backup is a database dump and a copy of that folder.
@@ -134,6 +136,7 @@ Your data lives in two places: the Postgres volume and the storage folder named 
 | `pnpm test` | Vitest |
 | `pnpm test:e2e` | Playwright, starting its own dev server |
 | `pnpm build` | A production build |
+| `pnpm preview` | Serves the production build locally |
 
 ### Where the code goes
 

@@ -101,9 +101,16 @@ export function signInWithPassword(email: string, password: string): Promise<GoT
   })
 }
 
-/** Verifies an access token GoTrue issued and returns the `auth.users` id it carries. */
+/**
+ * Verifies an access token GoTrue issued and returns the `auth.users` id it carries. The service
+ * key above is signed with the same secret, so a session has to prove it is not one: the audience
+ * must be the one GoTrue puts on a login, and the issuer must not be career-forge.
+ */
 export async function authUserIdFromToken(token: string): Promise<string> {
-  const { payload } = await jwtVerify(token, secret())
+  const { payload } = await jwtVerify(token, secret(), { audience: 'authenticated' })
+  if (payload.iss === 'career-forge') {
+    throw new GoTrueError(401, 'A service key is not a session')
+  }
   if (typeof payload.sub !== 'string' || payload.sub.length === 0) {
     throw new GoTrueError(401, 'Token carries no subject')
   }

@@ -9,6 +9,15 @@ const body = z.object({
 })
 
 /**
+ * A sign-up that raced another one loses on the `account_one_owner` unique index rather than on
+ * the check above. That is the same refusal, so it gets the same answer.
+ */
+function isOwnerAlreadyTaken(error: unknown): boolean {
+  const pg = error as { code?: unknown, constraint?: unknown }
+  return pg?.code === '23505' && pg?.constraint === 'account_one_owner'
+}
+
+/**
  * The first person to sign up claims the install and becomes the Owner. Sign-up then closes and
  * everyone else arrives by Invite (ADR 0007). Invites are a later ticket, so for now this route
  * answers exactly once.
@@ -38,6 +47,12 @@ export default defineEventHandler(async (event) => {
   }
   catch (error) {
     await deleteGoTrueUser(user.id).catch(() => {})
+    if (isOwnerAlreadyTaken(error)) {
+      throw createError({
+        statusCode: 403,
+        statusMessage: 'This install has an Owner already. Ask them for an Invite.',
+      })
+    }
     throw error
   }
 
